@@ -1,0 +1,9 @@
+# For Render deployment
+
+build:
+  builder: python
+  commands:
+    - pip install -r requirements.txt
+
+run:
+  web: gunicorn --bind 0.0.0.0:$PORT app:app

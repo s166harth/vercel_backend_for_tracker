@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Ingestion Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .card {
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            border: 1px solid rgba(0, 0, 0, 0.125);
+            margin-bottom: 1rem;
+        }
+        .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+        }
+        .loading {
+            display: none;
+        }
+        .collection-item {
+            border-left: 4px solid #007bff;
+            margin-bottom: 0.5rem;
+        }
+        .nav-tabs .nav-link.active {
+            background-color: #fff;
+            border-bottom-color: #fff;
+        }
+        .data-table {
+            font-size: 0.9rem;
+        }
+        .data-table th {
+            background-color: #f8f9fa;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        .status-online {
+            background-color: #28a745;
+        }
+        .status-offline {
+            background-color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-database me-2"></i>Telegram Ingestion Dashboard
+            </a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text">
+                    <span class="status-indicator status-online"></span>
+                    <span id="connection-status">Connected</span>
+                </span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-bar me-2"></i>Data Overview
+                        </h5>
+                        <button id="refresh-btn" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-sync-alt me-1"></i>Refresh Data
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="loading" class="loading text-center py-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2">Loading data from Firestore...</p>
+                        </div>
+                        
+                        <div id="content">
+                            <ul class="nav nav-tabs" id="dataTabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button" role="tab">All Data</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="articles-tab" data-bs-toggle="tab" data-bs-target="#articles" type="button" role="tab">Articles</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="books-tab" data-bs-toggle="tab" data-bs-target="#books" type="button" role="tab">Books</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="paintings-tab" data-bs-toggle="tab" data-bs-target="#paintings" type="button" role="tab">Paintings</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="writeups-tab" data-bs-toggle="tab" data-bs-target="#writeups" type="button" role="tab">Writeups</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="others-tab" data-bs-toggle="tab" data-bs-target="#others" type="button" role="tab">Others</button>
+                                </li>
+                            </ul>
+                            
+                            <div class="tab-content mt-3" id="dataTabsContent">
+                                <div class="tab-pane fade show active" id="all" role="tabpanel">
+                                    <div id="all-data-content"></div>
+                                </div>
+                                <div class="tab-pane fade" id="articles" role="tabpanel">
+                                    <div id="articles-content"></div>
+                                </div>
+                                <div class="tab-pane fade" id="books" role="tabpanel">
+                                    <div id="books-content"></div>
+                                </div>
+                                <div class="tab-pane fade" id="paintings" role="tabpanel">
+                                    <div id="paintings-content"></div>
+                                </div>
+                                <div class="tab-pane fade" id="writeups" role="tabpanel">
+                                    <div id="writeups-content"></div>
+                                </div>
+                                <div class="tab-pane fade" id="others" role="tabpanel">
+                                    <div id="others-content"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer mt-5 py-3 bg-light">
+        <div class="container text-center">
+            <span class="text-muted">Telegram Ingestion Dashboard &copy; 2025</span>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // API configuration
+        const API_BASE_URL = '/api';
+        
+        // DOM elements
+        const loadingElement = document.getElementById('loading');
+        const contentElement = document.getElementById('content');
+        const refreshBtn = document.getElementById('refresh-btn');
+        
+        // Data cache
+        let allData = {};
+        
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+            
+            // Add event listener to refresh button
+            refreshBtn.addEventListener('click', function() {
+                loadData();
+            });
+        });
+        
+        // Load data from API
+        async function loadData() {
+            showLoading();
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/data`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                allData = await response.json();
+                renderData();
+                updateConnectionStatus(true);
+            } catch (error) {
+                console.error('Error loading data:', error);
+                updateConnectionStatus(false);
+                showError('Failed to load data. Please try again later.');
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        // Show loading state
+        function showLoading() {
+            loadingElement.style.display = 'block';
+            contentElement.style.display = 'none';
+        }
+        
+        // Hide loading state
+        function hideLoading() {
+            loadingElement.style.display = 'none';
+            contentElement.style.display = 'block';
+        }
+        
+        // Update connection status indicator
+        function updateConnectionStatus(connected) {
+            const statusIndicator = document.querySelector('.status-indicator');
+            const statusText = document.getElementById('connection-status');
+            
+            if (connected) {
+                statusIndicator.className = 'status-indicator status-online';
+                statusText.textContent = 'Connected';
+            } else {
+                statusIndicator.className = 'status-indicator status-offline';
+                statusText.textContent = 'Disconnected';
+            }
+        }
+        
+        // Show error message
+        function showError(message) {
+            contentElement.innerHTML = `
+                <div class="alert alert-danger" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>${message}
+                </div>
+            `;
+        }
+        
+        // Render data in the UI
+        function renderData() {
+            // Render all data tab
+            renderTabContent('all-data-content', allData);
+            
+            // Render individual tabs
+            renderTabContent('articles-content', { article: allData.article || [] });
+            renderTabContent('books-content', { book: allData.book || [] });
+            renderTabContent('paintings-content', { painting: allData.painting || [] });
+            renderTabContent('writeups-content', { writeup: allData.writeup || [] });
+            renderTabContent('others-content', { 
+                other: allData.other || [],
+                search_guide: allData.search_guide || []
+            });
+        }
+        
+        // Render content for a specific tab
+        function renderTabContent(containerId, data) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            
+            let html = '';
+            
+            for (const [collectionName, items] of Object.entries(data)) {
+                if (items && items.length > 0) {
+                    html += `
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-folder me-2"></i>
+                                    ${collectionName.charAt(0).toUpperCase() + collectionName.slice(1)} 
+                                    <span class="badge bg-secondary">${items.length}</span>
+                                </h6>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover data-table mb-0">
+                                        <thead>
+                                            <tr>
+                    `;
+                    
+                    // Get all unique keys from the items to create table headers
+                    const allKeys = new Set();
+                    items.forEach(item => {
+                        Object.keys(item).forEach(key => allKeys.add(key));
+                    });
+                    
+                    // Create table headers
+                    for (const key of allKeys) {
+                        if (key !== 'id') { // Don't show the Firestore document ID in the table
+                            html += `<th>${key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</th>`;
+                        }
+                    }
+                    
+                    html += `
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                    `;
+                    
+                    // Create table rows
+                    items.forEach(item => {
+                        html += '<tr>';
+                        for (const key of allKeys) {
+                            if (key !== 'id') { // Don't show the Firestore document ID in the table
+                                let value = item[key] || '';
+                                // Truncate long values
+                                if (typeof value === 'string' && value.length > 100) {
+                                    value = value.substring(0, 100) + '...';
+                                }
+                                html += `<td>${value}</td>`;
+                            }
+                        }
+                        html += '</tr>';
+                    });
+                    
+                    html += `
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="alert alert-info" role="alert">
+                            <i class="fas fa-info-circle me-2"></i>
+                            No data available in ${collectionName} collection.
+                        </div>
+                    `;
+                }
+            }
+            
+            container.innerHTML = html;
+        }
+    </script>
+</body>
+</html>

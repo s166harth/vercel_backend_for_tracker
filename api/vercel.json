@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "name": "firestore-to-grafana-api",
+  "builds": [
+    {
+      "src": "vercel_app.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "vercel_app.py"
+    }
+  ]
+}
