@@ -12,38 +12,58 @@ CORS(app)
 # Initialize Firebase
 def initialize_firebase():
     # For deployment, you might need to set credentials differently
-    cred_path = os.environ.get('FIREBASE_CREDENTIALS_PATH', 'firebase_credentials.json')
-    
-    if not firebase_admin._apps:
-        cred = credentials.Certificate(cred_path)
-        firebase_admin.initialize_app(cred)
-    
+    # First try using GOOGLE_APPLICATION_CREDENTIALS (for Vercel deployment)
+    google_cred_path = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')
+
+    if google_cred_path:
+        # Use the Google Application Credentials (for Vercel)
+        if not firebase_admin._apps:
+            cred = credentials.Certificate(google_cred_path)
+            firebase_admin.initialize_app(cred)
+    else:
+        # Fallback to local credentials file
+        cred_path = os.environ.get('FIREBASE_CREDENTIALS_PATH', 'firebase_credentials.json')
+        if not firebase_admin._apps:
+            cred = credentials.Certificate(cred_path)
+            firebase_admin.initialize_app(cred)
+
     return firestore.client()
 
-# Initialize Firestore client
-try:
-    db = initialize_firebase()
-    print("Firebase initialized successfully for API")
-except Exception as e:
-    print(f"Error initializing Firebase: {e}")
-    db = None
+# Initialize Firestore client lazily
+db = None
+
+def get_firestore_client():
+    global db
+    if db is None:
+        try:
+            db = initialize_firebase()
+            print("Firebase initialized successfully for API")
+        except Exception as e:
+            print(f"Error initializing Firebase: {e}")
+            db = None
+    return db
 
 @app.route('/api/health', methods=['GET'])
 def health():
     """Health check endpoint"""
+    # Try to initialize Firebase to test connectivity
+    db = get_firestore_client()
+    if db is None:
+        return jsonify({'status': 'degraded', 'timestamp': datetime.utcnow().isoformat(), 'message': 'Firebase not initialized'})
     return jsonify({'status': 'healthy', 'timestamp': datetime.utcnow().isoformat()})
 
 @app.route('/api/data', methods=['GET'])
 def get_all_data():
     """Get all data from Firestore collections"""
+    db = get_firestore_client()
     if not db:
         return jsonify({'error': 'Database not initialized'}), 500
-    
+
     try:
         # Define the collections we want to fetch
         collections = ['article', 'book', 'painting', 'writeup']
         data = {}
-        
+
         for collection_name in collections:
             docs = db.collection(collection_name).stream()
             collection_data = []
@@ -53,7 +73,7 @@ def get_all_data():
                 doc_dict['collection'] = collection_name
                 collection_data.append(doc_dict)
             data[collection_name] = collection_data
-        
+
         return jsonify(data)
     except Exception as e:
         print(f"Error fetching data: {e}")
@@ -62,22 +82,23 @@ def get_all_data():
 @app.route('/api/grafana', methods=['POST'])
 def grafana_query():
     """API endpoint specifically formatted for Grafana"""
+    db = get_firestore_client()
     if not db:
         return jsonify({'error': 'Database not initialized'}), 500
-    
+
     try:
         # Get the query from the request
         req_data = request.get_json()
-        
+
         # Define the collections we want to fetch
         collections = ['article', 'book', 'painting', 'writeup']
         results = []
-        
+
         for collection_name in collections:
             docs = db.collection(collection_name).stream()
             for doc in docs:
                 doc_dict = doc.to_dict()
-                
+
                 # Extract timestamp - try different possible date fields
                 timestamp = None
                 for date_field in ['date', 'Publication Date', 'Date']:
@@ -93,26 +114,26 @@ def grafana_query():
                             break
                         except:
                             continue
-                
+
                 if timestamp is None:
                     timestamp = datetime.utcnow().timestamp() * 1000
-                
+
                 # Create a data point for Grafana
                 result = {
                     'timestamp': timestamp,
                     'collection': collection_name,
                     'type': collection_name,
                     'count': 1,
-                    'title': doc_dict.get('Article Title', 
-                                         doc_dict.get('Book Title', 
-                                         doc_dict.get('title', 
+                    'title': doc_dict.get('Article Title',
+                                         doc_dict.get('Book Title',
+                                         doc_dict.get('title',
                                          doc_dict.get('Writeup Title', 'Unknown')))),
                     'sender': doc_dict.get('sender_name', 'Unknown'),
                     'id': doc.id
                 }
-                
+
                 results.append(result)
-        
+
         # Format for Grafana
         grafana_format = []
         for result in results:
@@ -120,7 +141,7 @@ def grafana_query():
                 result['count'],  # value
                 int(result['timestamp'])  # timestamp in milliseconds
             ])
-        
+
         return jsonify([{
             'target': 'Content Count',
             'datapoints': grafana_format

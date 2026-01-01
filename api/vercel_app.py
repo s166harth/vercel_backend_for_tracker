@@ -1,46 +1,24 @@
 import os
+import base64
 import json
-from flask import Flask
-from flask.wrappers import Request, Response
-from werkzeug.exceptions import HTTPException
-from werkzeug.routing import Rule
-from werkzeug.urls import url_encode
-from werkzeug.utils import redirect
+import tempfile
 from app import app  # Import your existing Flask app
 
-def vercel_handler(environ, start_response):
-    """
-    Vercel-compatible WSGI handler for Flask app
-    """
-    # Set environment variables from Vercel secrets if available
-    firebase_credentials_encoded = os.environ.get('FIREBASE_CREDENTIALS')
-    if firebase_credentials_encoded:
-        import base64
-        # Decode the base64 credentials and write to file
+# Handle Firebase credentials for Vercel deployment
+firebase_credentials_encoded = os.environ.get('FIREBASE_CREDENTIALS')
+if firebase_credentials_encoded:
+    try:
+        # Decode the base64 credentials and write to a temporary file
         credentials_json = base64.b64decode(firebase_credentials_encoded).decode('utf-8')
-        with open('firebase_credentials.json', 'w') as f:
-            f.write(credentials_json)
-        os.environ['FIREBASE_CREDENTIALS_PATH'] = 'firebase_credentials.json'
+        # Create a temporary file for the credentials
+        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json') as cred_file:
+            cred_file.write(credentials_json)
+            os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = cred_file.name
+    except Exception as e:
+        print(f"Error processing Firebase credentials: {e}")
 
-    # Create a Flask request from the WSGI environ
-    with app.request_context(environ):
-        try:
-            # Process the request with Flask
-            response = app.full_dispatch_request()
-        except Exception as e:
-            # Handle exceptions
-            response = app.handle_user_exception(e)
-
-    # Convert Flask response to WSGI response
-    response_data = response.get_data()
-    status = f"{response.status_code} {response.status}"
-    headers = list(response.headers)
-
-    start_response(status, headers)
-    return [response_data]
-
-# Export the handler for Vercel
-handler = vercel_handler
+# For Vercel compatibility
+application = app
 
 # For local development compatibility
 if __name__ == "__main__":
