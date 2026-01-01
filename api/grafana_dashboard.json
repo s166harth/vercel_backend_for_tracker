@@ -23,10 +23,12 @@
         "targets": [
           {
             "refId": "A",
-            "url": "/api/data",
-            "method": "GET",
-            "data": "",
-            "format": "time_series"
+            "datasource": {
+              "type": "marcusolsson-json-datasource",
+              "uid": "telegram-data"
+            },
+            "json": "{\"queryType\":\"count\",\"collection\":\"all\"}",
+            "refId": "A"
           }
         ],
         "fieldConfig": {
@@ -74,10 +76,12 @@
         "targets": [
           {
             "refId": "A",
-            "url": "/api/data",
-            "method": "GET",
-            "data": "",
-            "format": "table"
+            "datasource": {
+              "type": "marcusolsson-json-datasource",
+              "uid": "telegram-data"
+            },
+            "json": "{\"queryType\":\"distribution\",\"collection\":\"all\"}",
+            "refId": "A"
           }
         ],
         "fieldConfig": {
@@ -126,10 +130,12 @@
         "targets": [
           {
             "refId": "A",
-            "url": "/api/grafana",
-            "method": "POST",
-            "data": "",
-            "format": "time_series"
+            "datasource": {
+              "type": "marcusolsson-json-datasource",
+              "uid": "telegram-data"
+            },
+            "json": "{\"queryType\":\"timeseries\",\"collection\":\"all\"}",
+            "refId": "A"
           }
         ],
         "fieldConfig": {
@@ -206,10 +212,12 @@
         "targets": [
           {
             "refId": "A",
-            "url": "/api/data",
-            "method": "GET",
-            "data": "",
-            "format": "table"
+            "datasource": {
+              "type": "marcusolsson-json-datasource",
+              "uid": "telegram-data"
+            },
+            "json": "{\"queryType\":\"list\",\"collection\":\"article\"}",
+            "refId": "A"
           }
         ],
         "fieldConfig": {
@@ -289,10 +297,12 @@
         "targets": [
           {
             "refId": "A",
-            "url": "/api/data",
-            "method": "GET",
-            "data": "",
-            "format": "table"
+            "datasource": {
+              "type": "marcusolsson-json-datasource",
+              "uid": "telegram-data"
+            },
+            "json": "{\"queryType\":\"list\",\"collection\":\"book\"}",
+            "refId": "A"
           }
         ],
         "fieldConfig": {
@@ -372,10 +382,12 @@
         "targets": [
           {
             "refId": "A",
-            "url": "/api/data",
-            "method": "GET",
-            "data": "",
-            "format": "table"
+            "datasource": {
+              "type": "marcusolsson-json-datasource",
+              "uid": "telegram-data"
+            },
+            "json": "{\"queryType\":\"list\",\"collection\":\"painting,writeup\"}",
+            "refId": "A"
           }
         ],
         "fieldConfig": {

@@ -62,7 +62,11 @@ echo $FIREBASE_CREDENTIALS | base64 -d > firebase_credentials.json
 ## API Endpoints
 
 - `GET /api/health` - Health check
-- `GET /api/data` - Get all Firestore data
+- `GET /api/data` - Get all Firestore data (all collections combined)
+- `GET /api/articles` - Get all articles from Firestore
+- `GET /api/books` - Get all books from Firestore
+- `GET /api/paintings` - Get all paintings from Firestore
+- `GET /api/writeups` - Get all writeups from Firestore
 - `POST /api/grafana` - Grafana-compatible data endpoint
 
 ## Grafana Configuration

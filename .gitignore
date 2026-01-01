@@ -55,3 +55,9 @@ output.html
 # Images directory (if it contains sensitive images)
 images/
 
+# API specific - exclude compiled Python files and Vercel cache
+api/__pycache__/
+api/.vercel/
+api/setup-vercel-env.sh
+api/VERCEL_SETUP.md
+

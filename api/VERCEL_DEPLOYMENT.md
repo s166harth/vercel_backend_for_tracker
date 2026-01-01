@@ -56,7 +56,11 @@ After deployment, you can also add environment variables through the Vercel dash
 
 Once deployed, your API will be available at:
 - `https://your-project-name.vercel.app/api/health` - Health check
-- `https://your-project-name.vercel.app/api/data` - Get all Firestore data
+- `https://your-project-name.vercel.app/api/data` - Get all Firestore data (all collections combined)
+- `https://your-project-name.vercel.app/api/articles` - Get all articles from Firestore
+- `https://your-project-name.vercel.app/api/books` - Get all books from Firestore
+- `https://your-project-name.vercel.app/api/paintings` - Get all paintings from Firestore
+- `https://your-project-name.vercel.app/api/writeups` - Get all writeups from Firestore
 - `https://your-project-name.vercel.app/api/grafana` - Grafana-compatible data endpoint
 
 ## Grafana Configuration
