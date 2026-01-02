@@ -1,0 +1,129 @@
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1rem;
+}
+
+.modal-content {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 1rem;
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 0 40px rgba(239, 68, 68, 0.2);
+    transform: scale(1);
+    animation: modalPop 0.2s ease-out;
+}
+
+@keyframes modalPop {
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--primary);
+    text-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+}
+
+.modal-close {
+    color: var(--text-muted);
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s;
+}
+
+.modal-close:hover {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--primary);
+}
+
+.modal-body {
+    padding: 1.5rem;
+    overflow-y: auto;
+}
+
+/* Detail View Styles */
+.detail-row {
+    margin-bottom: 1rem;
+}
+
+.detail-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin-bottom: 0.25rem;
+    font-weight: 600;
+}
+
+.detail-value {
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--text-main);
+    white-space: pre-wrap;
+    /* Preserve line breaks */
+}
+@media (max-width: 768px) {
+    .modal-content {
+        max-height: 85vh; /* Slightly smaller on mobile to avoid browser chrome issues */
+        width: 95%; /* Leave some gap on sides */
+    }
+
+    .modal-header, .modal-body {
+        padding: 1rem; /* Reduce padding */
+    }
+
+    .modal-title {
+        font-size: 1.1rem;
+    }
+    
+    /* Ensure detail rows stack well if needed */
+    .detail-row {
+        margin-bottom: 0.75rem;
+    }
+}
+
+/* Ensure detail values break words to prevent overflow on mobile */
+.detail-value {
+    word-break: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+}
+
+/* Ensure modal content fits within viewport width */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 90vw;
+        margin: 0 auto;
+    }
+}

@@ -1,0 +1,70 @@
+/* Aesthetic Button Styles */
+.aesthetic-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    /* Pill shape */
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    border: none;
+    outline: none;
+}
+
+/* Variant 1: Solid Snappy (Default) */
+.aesthetic-btn.variant-solid {
+    background-color: var(--primary);
+    color: white;
+    box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.2), 0 2px 4px -1px rgba(220, 38, 38, 0.1);
+}
+
+.aesthetic-btn.variant-solid:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 10px 15px -3px rgba(220, 38, 38, 0.3);
+}
+
+/* Variant 2: Glass / Frosted */
+.aesthetic-btn.variant-glass {
+    background: rgba(26, 8, 8, 0.6);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(220, 38, 38, 0.3);
+    color: var(--primary);
+}
+
+.aesthetic-btn.variant-glass:hover {
+    background: rgba(26, 8, 8, 0.8);
+    border-color: var(--primary);
+    box-shadow: 0 0 15px rgba(220, 38, 38, 0.15);
+}
+
+/* Variant 3: Neon Outline (Subtle) */
+.aesthetic-btn.variant-outline {
+    background: transparent;
+    border: 2px solid var(--primary);
+    color: var(--text-main);
+    box-shadow: 0 0 5px rgba(220, 38, 38, 0);
+    /* Glow ready */
+}
+
+.aesthetic-btn.variant-outline:hover {
+    background: rgba(220, 38, 38, 0.1);
+    box-shadow: 0 0 10px rgba(220, 38, 38, 0.4);
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+}
+
+/* Avatar inside button */
+.aesthetic-btn .btn-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: inherit;
+}

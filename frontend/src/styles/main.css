@@ -1,0 +1,115 @@
+:root {
+  /* Default variables (Red/Black - Snappy) */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --success: #10b981;
+  --error: #ef4444;
+}
+
+/* Theme 1: Red Black (Snappy) - Default */
+/* Applied to body by default or via .theme-red */
+body,
+body.theme-red {
+  --primary: #dc2626;
+  /* Red-600 */
+  --primary-hover: #ef4444;
+  /* Red-500 */
+  --secondary: #991b1b;
+  /* Red-800 */
+
+  --bg-dark: #0f0505;
+  /* Black-Red */
+  --bg-card: #1a0808;
+  --bg-card-hover: #260a0a;
+
+  --text-main: #f3f4f6;
+  --text-muted: #9ca3af;
+  --border-color: #450a0a;
+}
+
+/* Theme 2: Green Orange (Nature/Retro) */
+body.theme-green {
+  --primary: #d97706;
+  /* Amber-600 (Orange) */
+  --primary-hover: #f59e0b;
+  /* Amber-500 */
+  --secondary: #166534;
+  /* Green-700 */
+
+  --bg-dark: #022c22;
+  /* Very dark green */
+  --bg-card: #064e3b;
+  /* Dark green */
+  --bg-card-hover: #065f46;
+
+  --text-main: #ecfdf5;
+  /* Green-50 */
+  --text-muted: #6ee7b7;
+  /* Green-300 */
+  --border-color: #14532d;
+}
+
+/* Theme 3: Blue Pink (Neon/Vaporwave) */
+body.theme-blue {
+  --primary: #ec4899;
+  /* Pink-500 */
+  --primary-hover: #f472b6;
+  /* Pink-400 */
+  --secondary: #3b82f6;
+  /* Blue-500 */
+
+  --bg-dark: #0f172a;
+  /* Slate-900 */
+  --bg-card: #1e293b;
+  /* Slate-800 */
+  --bg-card-hover: #334155;
+
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --border-color: #334155;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
