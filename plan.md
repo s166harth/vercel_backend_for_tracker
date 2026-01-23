@@ -1,0 +1,6 @@
+- [ ] fix the problem with the books, render the graphs as per the "date" field in the data
+- [ ] same issue with the articles, render the charts as per the "date" field.
+- [ ] make sure the images are also pushed to to firebase, not just the name
+- [ ] do a run pipeline and you will see that there is a new schema for album reviews, make a collection for that on firebase
+- [ ] make a new section in the music tab, where we load the "album" reviews and everything
+- [ ]

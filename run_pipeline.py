@@ -3,6 +3,7 @@ import pandas as pd
 import re, os
 import asyncio
 from telethon.sync import TelegramClient
+from firebase_upload import upload_dataframes_to_firestore
 
 # --- TEMPLATE DEFINITIONS ---
 # Define the fields for each template. The order matters for the parser.
@@ -12,17 +13,21 @@ TEMPLATE_DEFINITIONS = {
         'DOI/URL', 'Abstract', 'Key Findings', 'Field/Topics', 'Personal Notes'
     ],
     'book': [
-        'Book Title', 'Author', 'Genre', 'Publication Year', 
+        'Book Title', 'Author', 'Genre', 'Publication Year', 'Pages',
         'My Rating', 'Review Summary', 'ISBN'
     ],
     'writeup': [
         'Writeup Title', 'Date', 'Category', 'Content', 
         'Key Ideas', 'Related Tags', 'Attachments'
+    ],
+    'album': [
+        'Album', 'Artist', 'Number of tracks', 'Runtime', 'Release Year', 'Genre', 
+        'My Rating', 'Standout tracks', 'Review (Lyrics)', 'Review (Sounds)', 'Overall Vibe'
     ]
 }
 
 # --- 1. FETCHING LOGIC ---
-async def fetch_messages_as_df(client, group_id, limit=200):
+async def fetch_messages_as_df(client, group_id, limit=1000):
     """Fetches messages from a Telegram group and returns them as a pandas DataFrame."""
     print(f"Looking for entity: {group_id}")
     entity = await client.get_entity(group_id)
@@ -79,6 +84,8 @@ def get_template_category(message_text):
         return 'painting'
     if text.startswith('**Writeup Title:**'):
         return 'writeup' if "**Date:**" in text else 'template_writeup'
+    if text.startswith('**Album:**'):
+        return 'album'
     if text.startswith('**Hey everyone! 🔍 Quick Search Guide**'):
         return 'search_guide'
     if text == 'TEMPLATES' or text == '':
@@ -190,7 +197,7 @@ async def main():
         print("Data processing finished. Now uploading to Firestore.")
 
         # Upload to Firestore
-        upload_dfs_to_firestore(final_dataframes)
+        upload_dataframes_to_firestore(final_dataframes)
 
         # Generate HTML Report (only if Google Sheets upload was successful)
         print("\n--- Generating HTML Report ---")
@@ -254,12 +261,12 @@ async def main():
                     tbody tr { border-bottom: 1px solid #dddddd; }
                     tbody tr:nth-of-type(even) { background-color: #f3f3f3; }
                     tbody tr:last-of-type { border-bottom: 2px solid #009879; }
-                    td { word-wrap: break-word; max-width: 400px; }
-                </style>
-            </head>
-            <body>
-                <h1>Telegram Scrape Report (Fallback)</h1>
-            """
+                td { word-wrap: break-word; max-width: 400px; }
+            </style>
+        </head>
+        <body>
+            <h1>Telegram Scrape Report (Fallback)</h1>
+        """
 
             for name, df in final_dataframes.items():
                 html_string += f"<h2>{name.replace('_', ' ').title()} ({len(df)} rows)</h2>"
@@ -283,95 +290,6 @@ async def main():
         if client.is_connected():
             await client.disconnect()
             print("Disconnected from Telegram.")
-
-
-
-# --- 4. FIRESTORE UPLOAD LOGIC ---
-def upload_dfs_to_firestore(dataframes):
-    """Uploads a dictionary of DataFrames to Firestore collections, avoiding duplicates."""
-    try:
-        import firebase_admin
-        from firebase_admin import credentials, firestore
-    except ImportError:
-        print("Firebase Admin SDK not installed. Install it using: pip install firebase-admin")
-        return
-
-    # Initialize Firebase app if not already initialized
-    if not firebase_admin._apps:
-        cred_path = 'firebase_credentials.json'  # You'll need to download this from Firebase Console
-        if os.path.exists(cred_path):
-            cred = credentials.Certificate(cred_path)
-            firebase_admin.initialize_app(cred)
-            print("Firebase initialized with service account credentials.")
-        else:
-            print(f"Firebase credentials file '{cred_path}' not found!")
-            print("To use Firestore, download your Firebase service account key:")
-            print("1. Go to Firebase Console (https://console.firebase.google.com/)")
-            print("2. Go to Project Settings > Service Accounts")
-            print("3. Click 'Generate new private key' (this downloads a JSON file)")
-            print("4. Rename the downloaded file to 'firebase_credentials.json'")
-            print("5. Place it in your project directory")
-            return
-
-    db = firestore.client()
-    print("Connected to Firestore.")
-
-    for collection_name, df in dataframes.items():
-        if df.empty:
-            print(f"  - Skipping empty collection: '{collection_name}'")
-            continue
-
-        # Skip 'other' and 'search_guide' collections
-        if collection_name in ['other', 'search_guide']:
-            print(f"  - Skipping collection (excluded): '{collection_name}'")
-            continue
-
-        print(f"  - Processing collection: '{collection_name}' ({len(df)} potential documents)")
-
-        # Get the collection reference
-        collection_ref = db.collection(collection_name)
-
-        # Identify new documents to upload by checking for existing documents
-        # We'll use a field like 'message_id' as a unique identifier if it exists in the data
-        new_docs_to_upload = []
-
-        for index, row in df.iterrows():
-            # Convert the row to a dictionary and handle NaN values
-            doc_data = {}
-            for col, value in row.items():
-                # Convert pandas/numpy NaN/NaT values to None for Firestore compatibility
-                if pd.isna(value):
-                    doc_data[col] = None
-                else:
-                    doc_data[col] = value
-
-            # Create a unique document ID based on message_id if available, otherwise use index
-            doc_id = None
-            if 'message_id' in doc_data and doc_data['message_id'] is not None:
-                doc_id = f"msg_{doc_data['message_id']}"
-            else:
-                doc_id = f"doc_{index}_{collection_name}"
-
-            # Check if document already exists
-            existing_doc = collection_ref.document(doc_id).get()
-            if existing_doc.exists:
-                print(f"    - Skipping duplicate document with ID: {doc_id}")
-            else:
-                new_docs_to_upload.append((doc_id, doc_data))
-
-        # Upload only new documents
-        if new_docs_to_upload:
-            print(f"    - Found {len(new_docs_to_upload)} new documents to upload")
-            for doc_id, doc_data in new_docs_to_upload:
-                doc_ref = collection_ref.document(doc_id)
-                doc_ref.set(doc_data)
-                print(f"      - Uploaded document with ID: {doc_id}")
-        else:
-            print(f"    - No new documents to upload for '{collection_name}'")
-
-    print("--- Firestore Upload Complete ---")
-    print("New data successfully uploaded to Firestore collections.")
-
 
 if __name__ == "__main__":
     asyncio.run(main())

@@ -41,10 +41,16 @@ export function ArticleInsights({ articles }) {
 
     // Enhance articles with formatted dates for ActivityChart
     const articlesWithDates = useMemo(() => {
-        return articles.map(a => ({
-            ...a,
-            date: a['Publication Date'] || a['Date Added'] || '2024-01-01' // Fallback or logic to get date
-        }));
+        return articles.map(a => {
+            let date = a['Publication Date'] || a['Date Added'];
+            if (!date || isNaN(new Date(date).getTime())) {
+                date = '2024-01-01'; // Fallback for invalid or missing dates
+            }
+            return {
+                ...a,
+                date: date
+            };
+        });
     }, [articles]);
 
     return (

@@ -44,13 +44,14 @@ function App() {
   }, []);
 
   const stats = useMemo(() => {
-    if (!data) return { article: 0, book: 0, painting: 0, writeup: 0, total: 0 };
+    if (!data) return { article: 0, book: 0, painting: 0, writeup: 0, album: 0, total: 0 };
     return {
       article: data.article?.length || 0,
       book: data.book?.length || 0,
       painting: data.painting?.length || 0,
       writeup: data.writeup?.length || 0,
-      total: (data.article?.length || 0) + (data.book?.length || 0) + (data.painting?.length || 0) + (data.writeup?.length || 0)
+      album: data.album?.length || 0,
+      total: (data.article?.length || 0) + (data.book?.length || 0) + (data.painting?.length || 0) + (data.writeup?.length || 0) + (data.album?.length || 0)
     };
   }, [data]);
 
@@ -61,6 +62,7 @@ function App() {
     if (data.book) items = [...items, ...data.book.map(i => ({ ...i, type: 'book' }))];
     if (data.painting) items = [...items, ...data.painting.map(i => ({ ...i, type: 'painting' }))];
     if (data.writeup) items = [...items, ...data.writeup.map(i => ({ ...i, type: 'writeup' }))];
+    if (data.album) items = [...items, ...data.album.map(i => ({ ...i, type: 'album' }))];
 
     // Sort by date if available
     return items.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
@@ -102,7 +104,7 @@ function App() {
         return <BlogInsights posts={blogPosts} />;
 
       case 'music':
-        return <MusicInsights />;
+        return <MusicInsights albums={data.album || []} />;
 
       case 'paintings':
         // Reuse ArticleInsights style list but for paintings (Custom implementation if needed later)

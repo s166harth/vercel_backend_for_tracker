@@ -1,11 +1,14 @@
 import os
 import pandas as pd
 import firebase_admin
-from firebase_admin import credentials, firestore
-
+from firebase_admin import credentials, firestore, storage
 
 def initialize_firebase():
     """Initialize Firebase connection."""
+    if firebase_admin._apps:
+        print("Firebase already initialized.")
+        return firestore.client()
+
     cred_path = 'firebase_credentials.json'
     
     if not os.path.exists(cred_path):
@@ -19,11 +22,29 @@ def initialize_firebase():
         return None
     
     cred = credentials.Certificate(cred_path)
-    firebase_admin.initialize_app(cred)
+    firebase_admin.initialize_app(cred, {
+        'storageBucket': os.getenv('FIREBASE_STORAGE_BUCKET')
+    })
     db = firestore.client()
-    print("Firebase initialized and connected to Firestore.")
+    print("Firebase initialized and connected to Firestore and Storage.")
     return db
 
+def upload_image_to_storage(image_path):
+    """Uploads an image to Firebase Storage and returns its public URL."""
+    if not image_path or not os.path.exists(image_path):
+        return None
+
+    bucket = storage.bucket()
+    blob = bucket.blob(f"images/{os.path.basename(image_path)}")
+    
+    # Upload the file
+    blob.upload_from_filename(image_path)
+    
+    # Make the blob publicly viewable
+    blob.make_public()
+    
+    print(f"  -> Uploaded {image_path} to Storage.")
+    return blob.public_url
 
 def upload_dataframes_to_firestore(dataframes):
     """Upload a dictionary of DataFrames to Firestore collections."""
@@ -32,81 +53,47 @@ def upload_dataframes_to_firestore(dataframes):
         return False
 
     for collection_name, df in dataframes.items():
+        if collection_name in ['search_guide', 'other']:
+            print(f"  - Skipping unwanted collection: '{collection_name}'")
+            continue
+
         if df.empty:
             print(f"  - Skipping empty collection: '{collection_name}'")
             continue
 
         print(f"  - Processing collection: '{collection_name}' ({len(df)} documents)")
         
-        # Get the collection reference
         collection_ref = db.collection(collection_name)
         
-        # Clear existing documents in the collection (optional - remove if you want to append)
         existing_docs = collection_ref.stream()
         for doc in existing_docs:
             doc.reference.delete()
         print(f"    - Cleared existing documents in '{collection_name}'")
         
-        # Upload each row as a document
         for index, row in df.iterrows():
-            # Convert the row to a dictionary and handle NaN values
             doc_data = {}
             for col, value in row.items():
-                # Convert pandas/numpy NaN/NaT values to None for Firestore compatibility
                 if pd.isna(value):
                     doc_data[col] = None
                 else:
                     doc_data[col] = value
             
-            # Add the document to Firestore with a specific ID
+            # if 'image_path' in doc_data and doc_data['image_path']:
+            #     image_url = upload_image_to_storage(doc_data['image_path'])
+            #     if image_url:
+            #         doc_data['image_url'] = image_url
+            #     # Keep image_path for reference or remove it
+            #     del doc_data['image_path']
+
             doc_ref = collection_ref.document(f"doc_{index}_{collection_name}")
             doc_ref.set(doc_data)
         
         print(f"    - Uploaded {len(df)} documents to '{collection_name}' collection")
 
     print("--- Firestore Upload Complete ---")
-    print("Data successfully uploaded to Firestore collections.")
     return True
-
-
-def upload_single_dataframe_to_firestore(df, collection_name):
-    """Upload a single DataFrame to a Firestore collection."""
-    db = initialize_firebase()
-    if not db or df.empty:
-        return False
-
-    print(f"  - Processing collection: '{collection_name}' ({len(df)} documents)")
-    
-    # Get the collection reference
-    collection_ref = db.collection(collection_name)
-    
-    # Clear existing documents in the collection (optional - remove if you want to append)
-    existing_docs = collection_ref.stream()
-    for doc in existing_docs:
-        doc.reference.delete()
-    print(f"    - Cleared existing documents in '{collection_name}'")
-    
-    # Upload each row as a document
-    for index, row in df.iterrows():
-        # Convert the row to a dictionary and handle NaN values
-        doc_data = {}
-        for col, value in row.items():
-            # Convert pandas/numpy NaN/NaT values to None for Firestore compatibility
-            if pd.isna(value):
-                doc_data[col] = None
-            else:
-                doc_data[col] = value
-        
-        # Add the document to Firestore
-        doc_ref = collection_ref.document(f"doc_{index}")
-        doc_ref.set(doc_data)
-    
-    print(f"    - Uploaded {len(df)} documents to '{collection_name}' collection")
-    print("--- Firestore Upload Complete ---")
-    return True
-
 
 if __name__ == "__main__":
     print("Firebase Upload Module")
-    print("This module provides functions to upload DataFrames to Firestore.")
+    print("This module provides functions to upload DataFrames to Firestore and images to Storage.")
     print("Import this module and use the upload_dataframes_to_firestore() function.")

@@ -2,8 +2,9 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { StatsCard } from './StatsCard';
 import { ActivityChart, HorizontalBarChart } from './Charts';
 import { Music, Disc, Mic2, PlayCircle, ExternalLink } from 'lucide-react';
+import { AlbumInsights } from './AlbumInsights';
 
-export function MusicInsights() {
+export function MusicInsights({ albums }) {
     const [topArtists, setTopArtists] = useState([]);
     const [topGenres, setTopGenres] = useState([]);
     const [totalScrobbles, setTotalScrobbles] = useState(0);
@@ -253,6 +254,11 @@ export function MusicInsights() {
                     </div>
                 </div>
             )}
+
+            <div className="album-insights-section" style={{ marginTop: '2rem' }}>
+                <h2 className="chart-title" style={{ marginBottom: '1rem', color: 'var(--primary)' }}>Album Reviews</h2>
+                <AlbumInsights albums={albums} />
+            </div>
         </div>
     );
 }

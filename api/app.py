@@ -23,6 +23,9 @@ def initialize_firebase():
     else:
         # Fallback to local credentials file
         cred_path = os.environ.get('FIREBASE_CREDENTIALS_PATH', 'firebase_credentials.json')
+        if not os.path.exists(cred_path):
+            cred_path = os.path.join('..', cred_path)
+            
         if os.path.exists(cred_path):
             if not firebase_admin._apps:
                 cred = credentials.Certificate(cred_path)
@@ -49,6 +52,14 @@ def get_firestore_client():
             db = None
     return db
 
+def normalize_date_field(doc_dict):
+    """Normalizes the date field to 'date'."""
+    for date_field in ['Publication Date', 'Date']:
+        if date_field in doc_dict:
+            doc_dict['date'] = doc_dict.pop(date_field)
+            break
+    return doc_dict
+
 @app.route('/api/health', methods=['GET'])
 def health():
     """Health check endpoint"""
@@ -67,7 +78,7 @@ def get_all_data():
 
     try:
         # Define the collections we want to fetch
-        collections = ['article', 'book', 'painting', 'writeup']
+        collections = ['article', 'book', 'painting', 'writeup', 'album']
         data = {}
 
         for collection_name in collections:
@@ -98,6 +109,7 @@ def get_articles():
         articles = []
         for doc in docs:
             doc_dict = doc.to_dict()
+            doc_dict = normalize_date_field(doc_dict)
             doc_dict['id'] = doc.id
             doc_dict['collection'] = 'article'
             articles.append(doc_dict)
@@ -120,6 +132,7 @@ def get_books():
         books = []
         for doc in docs:
             doc_dict = doc.to_dict()
+            doc_dict = normalize_date_field(doc_dict)
             doc_dict['id'] = doc.id
             doc_dict['collection'] = 'book'
             books.append(doc_dict)
@@ -172,6 +185,27 @@ def get_writeups():
     except Exception as e:
         print(f"Error fetching writeups: {e}")
         return jsonify({'error': 'Failed to fetch writeups'}), 500
+
+@app.route('/api/albums', methods=['GET'])
+def get_albums():
+    """Get all albums from Firestore"""
+    db = get_firestore_client()
+    if not db:
+        return jsonify({'error': 'Database not initialized'}), 500
+
+    try:
+        docs = db.collection('album').stream()
+        albums = []
+        for doc in docs:
+            doc_dict = doc.to_dict()
+            doc_dict['id'] = doc.id
+            doc_dict['collection'] = 'album'
+            albums.append(doc_dict)
+
+        return jsonify(albums)
+    except Exception as e:
+        print(f"Error fetching albums: {e}")
+        return jsonify({'error': 'Failed to fetch albums'}), 500
 
 @app.route('/api/grafana', methods=['POST'])
 def grafana_query():

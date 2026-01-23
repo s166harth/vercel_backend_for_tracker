@@ -9,7 +9,8 @@ import {
     Title,
     Tooltip,
     Legend,
-    ArcElement
+    ArcElement,
+    Filler
 } from 'chart.js';
 import { Line, Doughnut, Bar } from 'react-chartjs-2';
 
@@ -22,7 +23,8 @@ ChartJS.register(
     Title,
     Tooltip,
     Legend,
-    ArcElement
+    ArcElement,
+    Filler
 );
 
 // Common chart options for the theme
@@ -68,7 +70,7 @@ export function ActivityChart({ data }) {
         const sortedData = [...data].sort((a, b) => new Date(a.date) - new Date(b.date));
 
         sortedData.forEach(item => {
-            const date = new Date(item.date).toLocaleDateString();
+            const date = new Date(item.date).toISOString().split('T')[0];
             dateGroups[date] = (dateGroups[date] || 0) + 1;
         });
 
