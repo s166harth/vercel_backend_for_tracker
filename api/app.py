@@ -5,9 +5,24 @@ from firebase_admin import credentials, firestore
 import os
 from datetime import datetime
 import json
+import uuid
+import cloudinary
+import cloudinary.uploader
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
+
+# --- Cloudinary Configuration ---
+cloudinary_url = os.getenv('CLOUDINARY_URL')
+if not cloudinary_url:
+    print("API: CLOUDINARY_URL environment variable not found!")
+else:
+    print(f"API: Cloudinary configured. CLOUDINARY_URL: {cloudinary_url[:20]}...") # Print first 20 chars for verification
+
 
 # Initialize Firebase
 def initialize_firebase():
@@ -31,8 +46,6 @@ def initialize_firebase():
                 cred = credentials.Certificate(cred_path)
                 firebase_admin.initialize_app(cred)
         else:
-            # For testing purposes, try to initialize without credentials if file doesn't exist
-            # This will fail in actual usage but allows the app to start for testing
             print(f"Firebase credentials file not found at: {cred_path}")
             return None
 
@@ -63,11 +76,97 @@ def normalize_date_field(doc_dict):
 @app.route('/api/health', methods=['GET'])
 def health():
     """Health check endpoint"""
-    # Try to initialize Firebase to test connectivity
     db = get_firestore_client()
     if db is None:
         return jsonify({'status': 'degraded', 'timestamp': datetime.utcnow().isoformat(), 'message': 'Firebase not initialized - API will work but data endpoints will fail'})
+    
+    if not os.getenv('CLOUDINARY_URL'):
+        return jsonify({'status': 'degraded', 'timestamp': datetime.utcnow().isoformat(), 'message': 'Cloudinary not configured'})
+
     return jsonify({'status': 'healthy', 'timestamp': datetime.utcnow().isoformat()})
+
+@app.route('/api/upload', methods=['POST'])
+def upload_image():
+    """Uploads an image to Cloudinary and creates a record in Firestore."""
+    db = get_firestore_client()
+    if not db:
+        return jsonify({'error': 'Database not initialized'}), 500
+
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part in the request'}), 400
+
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No file selected for uploading'}), 400
+
+    if file:
+        try:
+            # Upload the file to Cloudinary
+            upload_result = cloudinary.uploader.upload(
+                file,
+                folder="tg_ingestion_gallery", # Optional: organize in a folder
+            )
+            
+            image_url = upload_result.get('secure_url')
+            
+            # Save metadata to Firestore
+            image_data = {
+                'title': request.form.get('title', file.filename),
+                'image_url': image_url,
+                'date': datetime.utcnow().isoformat(),
+                'uploaded_at': firestore.SERVER_TIMESTAMP
+            }
+            db.collection('gallery').add(image_data)
+            
+            return jsonify({'success': True, 'image_url': image_url}), 200
+
+        except Exception as e:
+            print(f"Error during image upload: {e}")
+            return jsonify({'error': 'Failed to upload image'}), 500
+
+    return jsonify({'error': 'Unknown error occurred'}), 500
+
+@app.route('/api/gallery', methods=['GET'])
+def get_gallery_data():
+    """Get all image data from 'painting' and 'gallery' collections."""
+    db = get_firestore_client()
+    if not db:
+        return jsonify({'error': 'Database not initialized'}), 500
+
+    all_images = []
+    try:
+        # Fetch from 'painting' collection (now also used for Telegram images)
+        paintings = db.collection('painting').stream()
+        for doc in paintings:
+            data = doc.to_dict()
+            if 'image_url' in data:
+                all_images.append({
+                    'id': doc.id,
+                    'url': data['image_url'],
+                    'title': data.get('title', 'Untitled Painting'),
+                    'date': data.get('date')
+                })
+
+        # Fetch from 'gallery' collection (for direct uploads)
+        gallery_items = db.collection('gallery').stream()
+        for doc in gallery_items:
+            data = doc.to_dict()
+            if 'image_url' in data:
+                all_images.append({
+                    'id': doc.id,
+                    'url': data['image_url'],
+                    'title': data.get('title', 'Untitled Image'),
+                    'date': data.get('date')
+                })
+        
+        # Sort by date, newest first
+        all_images.sort(key=lambda x: x.get('date', ''), reverse=True)
+
+        print(f"API: Fetched {len(all_images)} gallery items.") # Debug print
+        return jsonify(all_images)
+    except Exception as e:
+        print(f"Error fetching gallery data: {e}")
+        return jsonify({'error': 'Failed to fetch gallery data'}), 500
 
 @app.route('/api/data', methods=['GET'])
 def get_all_data():

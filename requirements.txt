@@ -2,3 +2,8 @@ firebase-admin
 google-cloud-storage
 pandas
 telethon
+
+# For Cloudinary image hosting
+cloudinary
+python-dotenv
+

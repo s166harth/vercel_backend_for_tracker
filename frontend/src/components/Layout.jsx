@@ -15,11 +15,11 @@ export function Layout({ children, activeView, onNavigate, currentTheme, onTheme
 
     const navItems = [
         { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+        { id: 'gallery', icon: Image, label: 'Gallery' },
         { id: 'books', icon: BookOpen, label: 'Books' },
         { id: 'articles', icon: FileText, label: 'Articles' },
         { id: 'blogs', icon: PenTool, label: 'Blogs' },
         { id: 'music', icon: Music, label: 'Music' },
-        { id: 'paintings', icon: Image, label: 'Paintings' },
     ];
 
     return (

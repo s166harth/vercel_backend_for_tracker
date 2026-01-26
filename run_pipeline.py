@@ -58,7 +58,7 @@ async def fetch_messages_as_df(client, group_id, limit=1000):
 
         message_list.append({
             'message_id': message.id,
-            'sender_id': message.sender_id,
+            'sender_id': sender_name, # Using sender_name for consistency
             'sender_name': sender_name,
             'date': message.date.strftime("%Y-%m-%d %H:%M:%S"),
             'text': message.text,
@@ -137,9 +137,10 @@ def parse_categorized_dfs(categorized_dfs):
                 # The title is the text after '**Painting**'
                 df['title'] = df['text'].str.replace('**Painting**', '', n=1).str.strip()
                 # Select and reorder the desired columns
-                parsed_dfs[name] = df[['date', 'title', 'image_path']].copy()
+                # Change: output to 'gallery' collection
+                parsed_dfs['gallery'] = df[['date', 'title', 'image_path', 'sender_id']].copy()
             else:
-                parsed_dfs[name] = pd.DataFrame(columns=['date', 'title', 'image_path'])
+                parsed_dfs['gallery'] = pd.DataFrame(columns=['date', 'title', 'image_path', 'sender_id'])
 
         elif name in TEMPLATE_DEFINITIONS:
             print(f"  - Parsing '{name}'...")

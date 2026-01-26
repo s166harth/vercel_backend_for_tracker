@@ -2,12 +2,13 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { useData } from './hooks/useData';
 import { Layout } from './components/Layout';
 import { StatsCard } from './components/StatsCard';
-import { ActivityChart, DistributionChart, HorizontalBarChart } from './components/Charts';
+import { ActivityChart, DistributionChart } from './components/Charts';
 import { ArticleInsights } from './components/ArticleInsights';
 import { BookInsights } from './components/BookInsights';
 import { BlogInsights } from './components/BlogInsights';
 import { MusicInsights } from './components/MusicInsights';
-import { BookOpen, FileText, Image, PenTool, Library } from 'lucide-react';
+import { Gallery } from './components/Gallery';
+import { BookOpen, FileText, PenTool, Library } from 'lucide-react';
 import { Modal } from './components/Modal';
 import './styles/dashboard.css';
 import './styles/modal.css';
@@ -48,7 +49,7 @@ function App() {
     return {
       article: data.article?.length || 0,
       book: data.book?.length || 0,
-      painting: data.painting?.length || 0,
+      // Removed painting from stats
       writeup: data.writeup?.length || 0,
       album: data.album?.length || 0,
       total: (data.article?.length || 0) + (data.book?.length || 0) + (data.painting?.length || 0) + (data.writeup?.length || 0) + (data.album?.length || 0)
@@ -60,7 +61,7 @@ function App() {
     let items = [];
     if (data.article) items = [...items, ...data.article.map(i => ({ ...i, type: 'article' }))];
     if (data.book) items = [...items, ...data.book.map(i => ({ ...i, type: 'book' }))];
-    if (data.painting) items = [...items, ...data.painting.map(i => ({ ...i, type: 'painting' }))];
+    // Removed painting from allItems
     if (data.writeup) items = [...items, ...data.writeup.map(i => ({ ...i, type: 'writeup' }))];
     if (data.album) items = [...items, ...data.album.map(i => ({ ...i, type: 'album' }))];
 
@@ -99,6 +100,9 @@ function App() {
 
       case 'books':
         return <BookInsights books={data.book || []} />;
+      
+      case 'gallery':
+        return <Gallery />;
 
       case 'blogs':
         return <BlogInsights posts={blogPosts} />;
@@ -106,25 +110,7 @@ function App() {
       case 'music':
         return <MusicInsights albums={data.album || []} />;
 
-      case 'paintings':
-        // Reuse ArticleInsights style list but for paintings (Custom implementation if needed later)
-        return (
-          <div className="articles-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1.5rem' }}>
-            {(data.painting || []).map((painting, idx) => (
-              <div key={idx} className="stats-card" style={{ padding: '0.5rem', display: 'flex', flexDirection: 'column' }}>
-                {painting.image_path ? (
-                  <img src={`/api/images/${painting.image_path.split('/').pop()}`} alt={painting.title} style={{ width: '100%', borderRadius: '0.5rem', marginBottom: '0.5rem' }} />
-                ) : (
-                  <div style={{ height: '150px', background: '#333', borderRadius: '0.5rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Image size={32} color="#666" />
-                  </div>
-                )}
-                <h4 style={{ fontSize: '0.9rem', color: 'var(--text-main)' }}>{painting.title || 'Untitled'}</h4>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{painting.date}</span>
-              </div>
-            ))}
-          </div>
-        );
+      // Removed paintings case
 
       case 'dashboard':
       default:
@@ -145,13 +131,7 @@ function App() {
                 color="green"
                 trend={5}
               />
-              <StatsCard
-                title="Paintings"
-                value={stats.painting}
-                icon={Image}
-                color="purple"
-                trend={8}
-              />
+              {/* Removed Paintings StatsCard */}
               <StatsCard
                 title="Total Blogs"
                 value={blogPosts.length}
