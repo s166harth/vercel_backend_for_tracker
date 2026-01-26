@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ImageUpload } from './ImageUpload';
+import Masonry from 'react-masonry-css';
 import { Image } from 'lucide-react';
-import { Carousel } from 'react-responsive-carousel';
-import "react-responsive-carousel/lib/styles/carousel.min.css"; // Import carousel styles
+// No ImageUpload component for Pinterest style
+// No Carousel for Pinterest style
 
 export function Gallery() {
     const [images, setImages] = useState([]);
@@ -31,10 +31,16 @@ export function Gallery() {
         fetchImages();
     }, [fetchImages]);
 
-    return (
-        <div className="gallery-container">
-            <ImageUpload onUploadSuccess={fetchImages} />
+    // Define breakpoints for masonry columns
+    const breakpointColumnsObj = {
+        default: 4,
+        1100: 3,
+        700: 2,
+        500: 1
+    };
 
+    return (
+        <div className="gallery-container" style={{ padding: '1rem' }}>
             <h2 style={{color: 'var(--text-main)', marginBottom: '1.5rem'}}>Image Gallery</h2>
 
             {loading && <p>Loading images...</p>}
@@ -45,58 +51,74 @@ export function Gallery() {
             )}
 
             {!loading && images.length > 0 && (
-                <Carousel
-                    showArrows={true}
-                    infiniteLoop={true}
-                    useKeyboardArrows={true}
-                    autoPlay={true}
-                    interval={5000}
-                    showThumbs={false}
-                    dynamicHeight={false}
-                    className="image-carousel"
-                    style={{ maxWidth: '800px', margin: '0 auto' }}
+                <Masonry
+                    breakpointCols={breakpointColumnsObj}
+                    className="my-masonry-grid"
+                    columnClassName="my-masonry-grid_column"
                 >
                     {images.map(image => (
-                        <div key={image.id} style={{
+                        <div key={image.id} className="gallery-item" style={{
                             backgroundColor: 'var(--bg-card)',
                             borderRadius: '0.75rem',
                             border: '1px solid var(--border-color)',
                             overflow: 'hidden',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            height: '500px' // Fixed height for carousel items
+                            marginBottom: '1rem', // Spacing between items
+                            breakInside: 'avoid' // Prevent breaking inside item
                         }}>
                             {image.url ? (
                                 <img src={image.url} alt={image.title} style={{
-                                    maxWidth: '100%',
-                                    maxHeight: '80%',
-                                    objectFit: 'contain', // Use contain to show full image
-                                    display: 'block',
-                                    margin: 'auto'
+                                    width: '100%',
+                                    height: 'auto', // Auto height for masonry
+                                    display: 'block'
                                 }} />
                             ) : (
-                                <div style={{ height: '100%', width: '100%', background: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <div style={{ height: '200px', background: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                     <Image size={40} color="#666" />
                                 </div>
                             )}
-                            <p className="legend" style={{
-                                backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                                color: 'white',
-                                padding: '0.5rem 1rem',
-                                borderRadius: '0.25rem',
-                                fontSize: '1rem',
-                                position: 'absolute',
-                                bottom: '10px',
-                                margin: 0
-                            }}>
-                                {image.title}
-                            </p>
+                            <div className="gallery-item-info" style={{ padding: '0.75rem' }}>
+                                <h4 style={{ color: 'var(--text-main)', margin: 0, fontSize: '0.9rem' }}>
+                                    {image.title}
+                                </h4>
+                                <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', margin: '0.25rem 0 0 0' }}>
+                                    {new Date(image.date).toLocaleDateString()}
+                                </p>
+                            </div>
                         </div>
                     ))}
-                </Carousel>
+                </Masonry>
             )}
         </div>
     );
 }
+
+// Add some basic CSS for masonry layout
+// This would ideally go into a CSS file, but for quick integration, inline is fine.
+const masonryStyles = `
+.my-masonry-grid {
+  display: -webkit-box; /* Not needed if autoprefixing */
+  display: -ms-flexbox; /* Not needed if autoprefixing */
+  display: flex;
+  margin-left: -1rem; /* gutter size offset */
+  width: auto;
+}
+.my-masonry-grid_column {
+  padding-left: 1rem; /* gutter size */
+  background-clip: padding-box;
+}
+
+/* Style your items */
+.my-masonry-grid_column > div { /* change div to all children you're rendering */
+  background: grey;
+  margin-bottom: 1rem;
+}
+`;
+
+// Inject styles into the head (for quick integration)
+if (typeof document !== 'undefined') {
+    const styleSheet = document.createElement("style");
+    styleSheet.type = "text/css";
+    styleSheet.innerText = masonryStyles;
+    document.head.appendChild(styleSheet);
+}
+
