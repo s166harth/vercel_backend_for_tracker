@@ -12,7 +12,6 @@ export function BookInsights({ books }) {
         const stats = {};
         books.forEach(book => {
             const genreField = book['Genre'] || 'Unknown';
-            // Split genres by comma, semicolon, or hashtags
             const genres = genreField.replace(/#/g, ',#').split(/[;,]+/).map(t => t.trim()).filter(Boolean);
 
             genres.forEach(genre => {
@@ -20,7 +19,6 @@ export function BookInsights({ books }) {
             });
         });
 
-        // Sort by count
         const sortedEntries = Object.entries(stats).sort((a, b) => b[1] - a[1]);
 
         return {
@@ -60,7 +58,7 @@ export function BookInsights({ books }) {
                     value={books.length}
                     icon={Library}
                     color="purple"
-                    trend={books.length > 0 ? 100 : 0} // Placeholder trend
+                    trend={books.length > 0 ? 100 : 0}
                 />
                 <StatsCard
                     title="Total Pages Read"
@@ -75,7 +73,6 @@ export function BookInsights({ books }) {
                     <div className="chart-header">
                         <h3 className="chart-title">Genre Distribution</h3>
                     </div>
-                    {/* Horizontal Bar Chart automatically handles its own height */}
                     <HorizontalBarChart
                         labels={genreStats.labels}
                         values={genreStats.values}
@@ -112,27 +109,17 @@ export function BookInsights({ books }) {
                             key={idx}
                             className="book-card"
                             onClick={() => setSelectedBook(book)}
-                            onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-                            onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border-color)'; e.currentTarget.style.transform = 'translateY(0)'; }}
                         >
                             <div>
-                                <h4 style={{ color: 'var(--primary)', marginBottom: '0.25rem' }}>{book['Book Title']}</h4>
-                                <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>by {book['Author']}</p>
+                                <h4 className="book-title">{book['Book Title']}</h4>
+                                <p className="book-author">by {book['Author']}</p>
                             </div>
-                            <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span style={{
-                                    fontSize: '0.75rem',
-                                    background: 'rgba(220, 38, 38, 0.1)',
-                                    color: '#ef4444',
-                                    padding: '0.25rem 0.5rem',
-                                    borderRadius: '0.25rem'
-                                }}>
-                                    {book['Genre']}
-                                </span>
+                            <div className="book-meta">
+                                <span className="book-genre">{book['Genre']}</span>
                                 {book['My Rating'] && (
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: '#fbbf24' }}>
+                                    <div className="book-rating">
                                         <Star size={14} fill="#fbbf24" />
-                                        <span style={{ fontSize: '0.875rem', fontWeight: 'bold' }}>{book['My Rating']}</span>
+                                        <span>{book['My Rating']}</span>
                                     </div>
                                 )}
                             </div>
@@ -156,7 +143,7 @@ export function BookInsights({ books }) {
                                     <div className="detail-label">{key}</div>
                                     <div className="detail-value">
                                         {isUrl ? (
-                                            <a href={value} target="_blank" rel="noreferrer" style={{ color: 'var(--primary)', textDecoration: 'underline' }}>
+                                            <a href={value} target="_blank" rel="noreferrer" className="link-primary">
                                                 {value}
                                             </a>
                                         ) : (

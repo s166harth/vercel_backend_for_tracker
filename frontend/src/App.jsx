@@ -19,15 +19,12 @@ function App() {
   const [activeView, setActiveView] = useState('dashboard');
   const [selectedDashboardItem, setSelectedDashboardItem] = useState(null);
 
-  // Theme State: 'theme-red' (default), 'theme-green', 'theme-blue'
   const [currentTheme, setCurrentTheme] = useState('theme-red');
 
-  // Apply theme to body
   useEffect(() => {
     document.body.className = currentTheme;
   }, [currentTheme]);
 
-  // Fetch Blog Posts
   const [blogPosts, setBlogPosts] = useState([]);
   useEffect(() => {
     async function fetchBlogPosts() {
@@ -49,7 +46,6 @@ function App() {
     return {
       article: data.article?.length || 0,
       book: data.book?.length || 0,
-      // Removed painting from stats
       writeup: data.writeup?.length || 0,
       album: data.album?.length || 0,
       total: (data.article?.length || 0) + (data.book?.length || 0) + (data.painting?.length || 0) + (data.writeup?.length || 0) + (data.album?.length || 0)
@@ -59,26 +55,17 @@ function App() {
   const allItems = useMemo(() => {
     if (!data) return [];
     let items = [];
-    if (data.article) items = [...items, ...data.article.map(i => ({ ...i, type: 'article' }))];
+    if (data.article) items = [...items, ...data.article.map(i => ({ ...i, type: 'article' }))]
     if (data.book) items = [...items, ...data.book.map(i => ({ ...i, type: 'book' }))];
-    // Removed painting from allItems
     if (data.writeup) items = [...items, ...data.writeup.map(i => ({ ...i, type: 'writeup' }))];
     if (data.album) items = [...items, ...data.album.map(i => ({ ...i, type: 'album' }))];
 
-    // Sort by date if available
     return items.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
   }, [data]);
 
   if (loading) {
     return (
-      <div className="loading-screen" style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-        color: 'var(--primary)',
-        fontSize: '1.5rem'
-      }}>
+      <div className="loading-screen">
         Loading Interface...
       </div>
     );
@@ -86,7 +73,7 @@ function App() {
 
   if (error) {
     return (
-      <div className="error-screen" style={{ padding: '2rem', color: 'var(--error)' }}>
+      <div className="error-screen">
         <h2>Error loading data</h2>
         <p>{error.message}</p>
       </div>
@@ -100,7 +87,7 @@ function App() {
 
       case 'books':
         return <BookInsights books={data.book || []} />;
-      
+
       case 'gallery':
         return <Gallery />;
 
@@ -109,8 +96,6 @@ function App() {
 
       case 'music':
         return <MusicInsights albums={data.album || []} />;
-
-      // Removed paintings case
 
       case 'dashboard':
       default:
@@ -131,7 +116,6 @@ function App() {
                 color="green"
                 trend={5}
               />
-              {/* Removed Paintings StatsCard */}
               <StatsCard
                 title="Total Blogs"
                 value={blogPosts.length}
@@ -155,42 +139,24 @@ function App() {
               </div>
             </div>
 
-            <div className="recent-items-section" style={{ marginTop: '2rem' }}>
-              <h3 className="chart-title" style={{ marginBottom: '1rem', color: 'var(--primary)' }}>Recent Activity</h3>
+            <div className="recent-items-section">
+              <h3 className="chart-title">Recent Activity</h3>
               <div className="recent-list">
                 {allItems.slice(0, 5).map((item, idx) => (
-                  <div key={idx} className="recent-item"
+                  <div 
+                    key={idx} 
+                    className="recent-item"
                     onClick={() => setSelectedDashboardItem(item)}
-                    style={{
-                      backgroundColor: 'var(--bg-card)',
-                      padding: '1rem',
-                      marginBottom: '0.5rem',
-                      borderRadius: '0.5rem',
-                      border: '1px solid var(--border-color)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      transition: 'all 0.2s',
-                      cursor: 'pointer'
-                    }}
-                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border-color)'; e.currentTarget.style.backgroundColor = 'var(--bg-card)'; }}
                   >
-                    <div>
-                      <span className="badge" style={{
-                        marginRight: '1rem',
-                        padding: '0.25rem 0.5rem',
-                        borderRadius: '0.25rem',
-                        fontSize: '0.75rem',
-                        backgroundColor: 'rgba(220, 38, 38, 0.1)',
-                        color: 'var(--primary)',
-                        border: '1px solid rgba(220, 38, 38, 0.2)'
-                      }}>
+                    <div className="recent-item-content">
+                      <span className="badge">
                         {item.type.toUpperCase()}
                       </span>
-                      <span>{item['Article Title'] || item['Book Title'] || item['title'] || item['Writeup Title'] || 'Untitled'}</span>
+                      <span className="recent-item-title">
+                        {item['Article Title'] || item['Book Title'] || item['title'] || item['Writeup Title'] || 'Untitled'}
+                      </span>
                     </div>
-                    <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>{item.date}</span>
+                    <span className="recent-item-date">{item.date}</span>
                   </div>
                 ))}
               </div>
@@ -226,7 +192,7 @@ function App() {
                   <div className="detail-label">{key}</div>
                   <div className="detail-value">
                     {isUrl ? (
-                      <a href={value} target="_blank" rel="noreferrer" style={{ color: 'var(--primary)', textDecoration: 'underline' }}>
+                      <a href={value} target="_blank" rel="noreferrer" className="link-primary">
                         {value}
                       </a>
                     ) : (

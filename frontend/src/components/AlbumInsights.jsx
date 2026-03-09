@@ -7,7 +7,7 @@ export function AlbumInsights({ albums }) {
 
     if (!albums || albums.length === 0) {
         return (
-            <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>
+            <div className="empty-state">
                 No album reviews found.
             </div>
         );
@@ -15,32 +15,24 @@ export function AlbumInsights({ albums }) {
 
     return (
         <div className="insights-container" style={{ paddingTop: 0 }}>
-            <div className="albums-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1.5rem' }}>
+            <div className="albums-grid">
                 {albums.map((album, idx) => (
                     <div
                         key={idx}
                         className="album-card"
                         onClick={() => setSelectedAlbum(album)}
-                        style={{
-                            background: 'var(--bg-card)',
-                            border: '1px solid var(--border-color)',
-                            borderRadius: '0.5rem',
-                            padding: '1rem',
-                            transition: 'all 0.2s',
-                            cursor: 'pointer'
-                        }}
-                        onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border-color)'; e.currentTarget.style.transform = 'translateY(0)'; }}
                     >
-                        <h4 style={{ color: 'var(--primary)', marginBottom: '0.5rem', fontSize: '1.1rem' }}>{album['Album']}</h4>
-                        <p style={{ color: 'var(--text-muted)', marginBottom: '0.5rem', fontSize: '0.9rem' }}>by {album['Artist']}</p>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
-                            <Tag size={14} />
-                            <span style={{ fontSize: '0.8rem' }}>{album['Genre']}</span>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#facc15' /* yellow-400 */ }}>
-                            <Star size={14} />
-                            <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>{album['My Rating']}</span>
+                        <h4 className="album-title">{album['Album']}</h4>
+                        <p className="album-artist">by {album['Artist']}</p>
+                        <div className="album-meta">
+                            <div className="album-genre-tag">
+                                <Tag size={14} />
+                                <span>{album['Genre']}</span>
+                            </div>
+                            <div className="album-rating">
+                                <Star size={14} />
+                                <span>{album['My Rating']}</span>
+                            </div>
                         </div>
                     </div>
                 ))}
@@ -63,7 +55,7 @@ export function AlbumInsights({ albums }) {
                                     <div className="detail-label">{key}</div>
                                     <div className="detail-value">
                                         {isUrl ? (
-                                            <a href={value} target="_blank" rel="noreferrer" style={{ color: 'var(--primary)', textDecoration: 'underline' }}>
+                                            <a href={value} target="_blank" rel="noreferrer" className="link-primary">
                                                 {value}
                                             </a>
                                         ) : (

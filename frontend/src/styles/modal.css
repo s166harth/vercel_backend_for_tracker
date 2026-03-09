@@ -1,12 +1,13 @@
-/* Modal Styles */
+/* Modal Styles - Frost Glass */
 .modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.75);
-    backdrop-filter: blur(4px);
+    background-color: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -15,22 +16,24 @@
 }
 
 .modal-content {
-    background-color: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: 1rem;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 1.5rem;
     width: 100%;
     max-width: 600px;
     max-height: 90vh;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 0 40px rgba(239, 68, 68, 0.2);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--glass-highlight);
     transform: scale(1);
-    animation: modalPop 0.2s ease-out;
+    animation: modalPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 @keyframes modalPop {
     from {
-        transform: scale(0.95);
+        transform: scale(0.9);
         opacity: 0;
     }
 
@@ -42,29 +45,34 @@
 
 .modal-header {
     padding: 1.5rem;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--glass-border);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    background: var(--glass-highlight);
+    border-radius: 1.5rem 1.5rem 0 0;
 }
 
 .modal-title {
     font-size: 1.25rem;
     font-weight: 600;
-    color: var(--primary);
-    text-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+    color: var(--text-main);
+    text-shadow: 0 0 20px var(--glass-border-hover);
 }
 
 .modal-close {
     color: var(--text-muted);
     padding: 0.5rem;
-    border-radius: 0.5rem;
+    border-radius: 0.75rem;
     transition: all 0.2s;
+    background: transparent;
+    border: 1px solid transparent;
 }
 
 .modal-close:hover {
-    background-color: rgba(239, 68, 68, 0.1);
+    background: var(--glass-highlight);
     color: var(--primary);
+    border-color: var(--glass-border);
 }
 
 .modal-body {
@@ -75,6 +83,13 @@
 /* Detail View Styles */
 .detail-row {
     margin-bottom: 1rem;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    transition: background 0.2s;
+}
+
+.detail-row:hover {
+    background: var(--glass-highlight);
 }
 
 .detail-label {
@@ -88,39 +103,36 @@
 
 .detail-value {
     font-size: 1rem;
-    line-height: 1.5;
+    line-height: 1.6;
     color: var(--text-main);
     white-space: pre-wrap;
-    /* Preserve line breaks */
 }
+
 @media (max-width: 768px) {
     .modal-content {
-        max-height: 85vh; /* Slightly smaller on mobile to avoid browser chrome issues */
-        width: 95%; /* Leave some gap on sides */
+        max-height: 85vh;
+        width: 95%;
     }
 
     .modal-header, .modal-body {
-        padding: 1rem; /* Reduce padding */
+        padding: 1rem;
     }
 
     .modal-title {
         font-size: 1.1rem;
     }
-    
-    /* Ensure detail rows stack well if needed */
+
     .detail-row {
         margin-bottom: 0.75rem;
     }
 }
 
-/* Ensure detail values break words to prevent overflow on mobile */
 .detail-value {
     word-break: break-word;
     overflow-wrap: break-word;
     max-width: 100%;
 }
 
-/* Ensure modal content fits within viewport width */
 @media (max-width: 768px) {
     .modal-content {
         width: 90vw;

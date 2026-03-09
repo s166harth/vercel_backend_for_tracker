@@ -11,7 +11,6 @@ export function ArticleInsights({ articles }) {
         const stats = {};
         articles.forEach(article => {
             const topics = article['Field/Topics'] || '';
-            // Handle hashtags as separators by adding a comma before them, then split
             const tags = topics.replace(/#/g, ',#').split(/[;,]+/).map(t => t.trim()).filter(Boolean);
 
             tags.forEach(tag => {
@@ -19,7 +18,6 @@ export function ArticleInsights({ articles }) {
             });
         });
 
-        // Top 10 tags
         const sortedTags = Object.entries(stats)
             .sort((a, b) => b[1] - a[1])
             .slice(0, 10);
@@ -39,12 +37,11 @@ export function ArticleInsights({ articles }) {
         });
     }, [articles, searchTerm]);
 
-    // Enhance articles with formatted dates for ActivityChart
     const articlesWithDates = useMemo(() => {
         return articles.map(a => {
             let date = a['Publication Date'] || a['Date Added'];
             if (!date || isNaN(new Date(date).getTime())) {
-                date = '2024-01-01'; // Fallback for invalid or missing dates
+                date = '2024-01-01';
             }
             return {
                 ...a,
@@ -91,30 +88,11 @@ export function ArticleInsights({ articles }) {
                             key={idx}
                             className="article-card"
                             onClick={() => setSelectedArticle(article)}
-                            style={{
-                                background: 'var(--bg-card)',
-                                border: '1px solid var(--border-color)',
-                                borderRadius: '0.5rem',
-                                padding: '1rem',
-                                transition: 'all 0.2s',
-                                cursor: 'pointer'
-                            }}
-                            onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-                            onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border-color)'; e.currentTarget.style.transform = 'translateY(0)'; }}
                         >
-                            <h4 style={{ color: 'var(--primary)', marginBottom: '0.5rem' }}>{article['Article Title']}</h4>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.5rem' }}>
+                            <h4 className="article-title">{article['Article Title']}</h4>
+                            <div className="article-tags">
                                 {(article['Field/Topics'] || '').replace(/#/g, ',#').split(/[;,]+/).map(t => t.trim()).filter(Boolean).slice(0, 3).map((tag, i) => (
-                                    <span key={i} style={{
-                                        fontSize: '0.75rem',
-                                        padding: '0.25rem 0.5rem',
-                                        background: 'rgba(252, 165, 165, 0.1)',
-                                        color: 'var(--text-muted)',
-                                        borderRadius: '0.25rem',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '0.25rem'
-                                    }}>
+                                    <span key={i} className="tag-chip">
                                         <Tag size={12} />
                                         {tag}
                                     </span>
@@ -140,7 +118,7 @@ export function ArticleInsights({ articles }) {
                                     <div className="detail-label">{key}</div>
                                     <div className="detail-value">
                                         {isUrl ? (
-                                            <a href={value} target="_blank" rel="noreferrer" style={{ color: 'var(--primary)', textDecoration: 'underline' }}>
+                                            <a href={value} target="_blank" rel="noreferrer" className="link-primary">
                                                 {value}
                                             </a>
                                         ) : (

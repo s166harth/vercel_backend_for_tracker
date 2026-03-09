@@ -24,6 +24,14 @@ body.theme-red {
   --text-main: #f3f4f6;
   --text-muted: #9ca3af;
   --border-color: #450a0a;
+  
+  /* Frost Glass - Red */
+  --glass-bg: rgba(26, 8, 8, 0.5);
+  --glass-bg-hover: rgba(26, 8, 8, 0.7);
+  --glass-border: rgba(220, 38, 38, 0.25);
+  --glass-border-hover: rgba(220, 38, 38, 0.5);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+  --glass-highlight: rgba(255, 255, 255, 0.08);
 }
 
 /* Theme 2: Green Orange (Nature/Retro) */
@@ -46,6 +54,14 @@ body.theme-green {
   --text-muted: #6ee7b7;
   /* Green-300 */
   --border-color: #14532d;
+  
+  /* Frost Glass - Green */
+  --glass-bg: rgba(6, 78, 59, 0.5);
+  --glass-bg-hover: rgba(6, 78, 59, 0.7);
+  --glass-border: rgba(16, 185, 129, 0.25);
+  --glass-border-hover: rgba(16, 185, 129, 0.5);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+  --glass-highlight: rgba(255, 255, 255, 0.08);
 }
 
 /* Theme 3: Blue Pink (Neon/Vaporwave) */
@@ -66,6 +82,14 @@ body.theme-blue {
   --text-main: #f8fafc;
   --text-muted: #94a3b8;
   --border-color: #334155;
+  
+  /* Frost Glass - Blue */
+  --glass-bg: rgba(30, 41, 59, 0.5);
+  --glass-bg-hover: rgba(30, 41, 59, 0.7);
+  --glass-border: rgba(236, 72, 153, 0.25);
+  --glass-border-hover: rgba(236, 72, 153, 0.5);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+  --glass-highlight: rgba(255, 255, 255, 0.08);
 }
 
 * {
@@ -81,6 +105,12 @@ body {
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   transition: background-color 0.3s ease, color 0.3s ease;
+  
+  /* Subtle gradient background for frost glass depth */
+  background-image: 
+    radial-gradient(ellipse at top left, var(--glass-border-hover) 0%, transparent 50%),
+    radial-gradient(ellipse at bottom right, var(--glass-border) 0%, transparent 50%);
+  background-attachment: fixed;
 }
 
 a {
@@ -94,6 +124,63 @@ button {
   background: none;
   font-family: inherit;
 }
+
+/* ============================================
+   FROST GLASS UTILITY CLASSES
+   ============================================ */
+
+/* Base frost glass effect */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+.glass:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-hover);
+}
+
+/* Frost glass card variant */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 1rem;
+  box-shadow: var(--glass-shadow);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
+}
+
+/* Frost glass panel (lighter) */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-highlight);
+  border-radius: 0.75rem;
+}
+
+/* Frost glass inset (for inputs, etc.) */
+.glass-inset {
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--glass-border);
+  border-radius: 0.5rem;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* ============================================ */
 
 /* Scrollbar */
 ::-webkit-scrollbar {
