@@ -82,7 +82,7 @@ body.theme-blue {
   --text-main: #f8fafc;
   --text-muted: #94a3b8;
   --border-color: #334155;
-  
+
   /* Frost Glass - Blue */
   --glass-bg: rgba(30, 41, 59, 0.5);
   --glass-bg-hover: rgba(30, 41, 59, 0.7);
@@ -105,11 +105,20 @@ body {
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   transition: background-color 0.3s ease, color 0.3s ease;
-  
+
   /* Subtle gradient background for frost glass depth */
-  background-image: 
+  background-image:
     radial-gradient(ellipse at top left, var(--glass-border-hover) 0%, transparent 50%),
     radial-gradient(ellipse at bottom right, var(--glass-border) 0%, transparent 50%);
+  background-attachment: fixed;
+}
+
+/* Snappy Red Theme - Enhanced with Red Gradient */
+body.theme-red {
+  background-image:
+    radial-gradient(ellipse at center, #1a0505 0%, #0f0505 60%),
+    radial-gradient(ellipse at top left, rgba(220, 38, 38, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at bottom right, rgba(220, 38, 38, 0.1) 0%, transparent 50%);
   background-attachment: fixed;
 }
 

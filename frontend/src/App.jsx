@@ -10,6 +10,7 @@ import { MusicInsights } from './components/MusicInsights';
 import { Gallery } from './components/Gallery';
 import { BookOpen, FileText, PenTool, Library } from 'lucide-react';
 import { Modal } from './components/Modal';
+import { SakuraCanvas } from './components/SakuraCanvas';
 import './styles/dashboard.css';
 import './styles/modal.css';
 import './styles/buttons.css';
@@ -19,6 +20,7 @@ function App() {
   const [activeView, setActiveView] = useState('dashboard');
   const [selectedDashboardItem, setSelectedDashboardItem] = useState(null);
 
+  // Default theme: Snappy Red
   const [currentTheme, setCurrentTheme] = useState('theme-red');
 
   useEffect(() => {
@@ -173,6 +175,7 @@ function App() {
       currentTheme={currentTheme}
       onThemeChange={setCurrentTheme}
     >
+      {currentTheme === 'theme-red' && <SakuraCanvas />}
       {renderContent()}
 
       <Modal

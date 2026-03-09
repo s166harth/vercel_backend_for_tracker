@@ -24,25 +24,16 @@ export function Layout({ children, activeView, onNavigate, currentTheme, onTheme
 
     return (
         <div className="app-layout">
-            <div
-                className={`sidebar-overlay ${mobileMenuOpen ? 'visible' : ''}`}
-                onClick={() => setMobileMenuOpen(false)}
-            />
-
+            {/* Cockpit - Top Navigation Bar */}
             <aside className={`sidebar ${mobileMenuOpen ? 'open' : ''}`}>
                 <div className="sidebar-header">
                     <div className="logo">
                         <LayoutDashboard size={24} className="logo-icon" />
                         <span>All-Track</span>
                     </div>
-                    <button
-                        className="mobile-menu-btn"
-                        onClick={() => setMobileMenuOpen(false)}
-                        style={{ display: mobileMenuOpen ? 'flex' : 'none' }}
-                    >
-                        <X size={24} />
-                    </button>
                 </div>
+
+                {/* Navigation - Horizontal */}
                 <nav className="sidebar-nav">
                     {navItems.map((item) => {
                         const Icon = item.icon;
@@ -54,6 +45,7 @@ export function Layout({ children, activeView, onNavigate, currentTheme, onTheme
                                     onNavigate(item.id);
                                     setMobileMenuOpen(false);
                                 }}
+                                title={item.label}
                             >
                                 <Icon size={20} />
                                 <span>{item.label}</span>
@@ -61,35 +53,41 @@ export function Layout({ children, activeView, onNavigate, currentTheme, onTheme
                         );
                     })}
                 </nav>
+
+                {/* Right Side Actions */}
+                <div className="cockpit-actions">
+                    <button
+                        className="aesthetic-btn variant-outline"
+                        onClick={() => setThemeOpen(true)}
+                        title="Change Aesthetic"
+                    >
+                        <Palette size={18} />
+                        <span>Aesthetic</span>
+                    </button>
+
+                    <button className="aesthetic-btn variant-solid" onClick={() => setProfileOpen(true)}>
+                        <div className="btn-avatar">SD</div>
+                        <span>siddharthsagar2019@gmail.com</span>
+                    </button>
+
+                    {/* Mobile menu toggle */}
+                    <button
+                        className="mobile-menu-btn"
+                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                        style={{ display: 'none' }}
+                    >
+                        {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                    </button>
+                </div>
             </aside>
+
+            {/* Sidebar Overlay for mobile */}
+            <div
+                className={`sidebar-overlay ${mobileMenuOpen ? 'visible' : ''}`}
+                onClick={() => setMobileMenuOpen(false)}
+            />
+
             <main className="main-content">
-                <header className="top-bar">
-                    <div className="top-bar-header">
-                        <button
-                            className="mobile-menu-btn"
-                            onClick={() => setMobileMenuOpen(true)}
-                        >
-                            <Menu size={24} />
-                        </button>
-                        <h1 className="page-title">{activeView.charAt(0).toUpperCase() + activeView.slice(1)}</h1>
-                    </div>
-
-                    <div className="top-bar-actions">
-                        <button
-                            className="aesthetic-btn variant-outline"
-                            onClick={() => setThemeOpen(true)}
-                            title="Change Aesthetic"
-                        >
-                            <Palette size={18} />
-                            <span>Aesthetic</span>
-                        </button>
-
-                        <button className="aesthetic-btn variant-solid" onClick={() => setProfileOpen(true)}>
-                            <div className="btn-avatar">SD</div>
-                            <span>siddharthsagar2019@gmail.com</span>
-                        </button>
-                    </div>
-                </header>
                 <div className="content-area">
                     {children}
                 </div>
